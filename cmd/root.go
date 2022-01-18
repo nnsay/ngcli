@@ -1,11 +1,8 @@
-/*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
-*/
 package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -17,14 +14,35 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ngcli",
-	Short: "A CLI tool for neuralgalaxy service",
+	Short: "A CLI tool for cloud service",
 	Long: `NGCLI providers the ability to use and manage Neural Galaxy data service with the commond line style. For example:
-login,manage resoruce and user,uploading,downloading...
+login, manage resoruce and user, uploading, downloading...
 
-But CLI could not do anything for example: view the brain 2D/3D. The tool is good at non-visualization feature.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+But CLI could not do anything for example: view the brain 2D/3D data. The tool is good at non-visualization feature.
+
+CLI support the config file, the config options looks like:
+	endpoint: app-api.cloud.cn
+	username: user1@cloud.com
+	password: user1password
+	applicationType: 1
+`,
+
+	Run: func(cmd *cobra.Command, args []string) {
+		endpoint := viper.GetString("endpoint")
+		if endpoint == "" {
+			log.Panic("endpoint is requried")
+		}
+		username := viper.GetString("username")
+		if username == "" {
+			log.Panic("username is requried")
+		}
+		password := viper.GetString("password")
+		if password == "" {
+			log.Panic("password is requried")
+		}
+
+		loginCmd.Run(cmd, args)
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -39,11 +57,24 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
+	// config file
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ngcli.yaml)")
+
+	// endpoint
+	rootCmd.PersistentFlags().StringP("endpoint", "e", "", "required, the cloud server endpoint, eg: app-api.cloud.cn")
+	viper.BindPFlag("endpoint", rootCmd.PersistentFlags().Lookup("endpoint"))
+	viper.SetDefault("endpoint", "app-api.cloud.cn")
+	rootCmd.MarkFlagRequired("endpoint")
+	// username
+	rootCmd.PersistentFlags().StringP("username", "u", "", "required, eg: user@cloud.cn")
+	rootCmd.MarkFlagRequired("username")
+	rootCmd.PersistentFlags().StringP("password", "p", "", "required, eg: password for user account")
+	rootCmd.MarkFlagRequired("password")
+
+	// applicationType
+	rootCmd.PersistentFlags().IntP("applicationType", "a", 0, "required, the production code, eg: data service(1), presurge(2), default 1")
+	viper.BindPFlag("applicationType", rootCmd.PersistentFlags().Lookup("applicationType"))
+	viper.SetDefault("applicationType", 1)
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
