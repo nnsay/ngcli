@@ -22,68 +22,22 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"nnsay/ngcli/lib"
-	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
-
-// LoginDTO -- login api request dto
-type LoginDTO struct {
-	ApplicationType int    `json:"applicationType"`
-	UserName        string `json:"email"`
-	Password        string `json:"password"`
-}
-
-// LoinResultDTO -- login api response dto
-type LoinResultDTO struct {
-	Message string `json:"message"`
-	Token   string `json:"token"`
-	User    struct {
-		ID    int `json:"id"`
-		OrgID int `json:"orgId"`
-	} `json:user`
-}
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login with username/password which are prividers by flags or configuration file",
 	Run: func(cmd *cobra.Command, args []string) {
-		username := viper.GetString("username")
-		password := viper.GetString("password")
-		applicationType := viper.GetInt("applicationType")
-		loginDTO := LoginDTO{applicationType, username, password}
-		body, _ := json.Marshal(loginDTO)
-		url := fmt.Sprintf("https://%s/%s", viper.GetString("endpoint"), lib.API_AUTH_LOGIN)
-
-		result, err := lib.GetFetch().Request(http.MethodPost, url, bytes.NewBuffer(body))
+		err := lib.GetFetch().Login()
 		if err != nil {
 			log.Panic(err)
 		}
-		loginResult := LoinResultDTO{}
-		err = json.Unmarshal(result, &loginResult)
-		if err != nil {
-			log.Panic(err)
-		}
-
-		config, err := lib.ReadConfig()
-		if err != nil {
-			log.Panic(err)
-		}
-		config.Auth = lib.AuthConfig{
-			Token:   loginResult.Token,
-			TokenAt: time.Now().Format("2006-01-02 13:04:06"),
-			OrgId:   loginResult.User.OrgID,
-		}
-		lib.SaveConfig(config)
-
 		fmt.Println("Login Success")
 	},
 }

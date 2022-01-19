@@ -16,3 +16,27 @@ Of cause, you also can run login sub-command:
 ```
 ./ngcli auth login
 ```
+
+## ngcli project 
+
+### ngcli project list
+```
+./ngcli project list
+```
+
+# ngcli subeject
+
+### ngcli subject list
+```
+./ngcli subject list
+```
+
+### ngcli subject create
+```
+./ngcli subject create --projectId 207 --subjectCustId abc
+```
+
+### ngcli subject delete
+```
+./ngcli subject delete --subjectId 3959 --projectId 207
+```

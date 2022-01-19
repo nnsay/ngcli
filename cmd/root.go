@@ -15,8 +15,10 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "ngcli",
 	Short: "A CLI tool for cloud service",
-	Long: `NGCLI providers the ability to use and manage Neural Galaxy data service with the commond line style. For example:
-login, manage resoruce and user, uploading, downloading...
+	Long: `NGCLI providers the ability to operate and manage Neural Galaxy cloud resource with the commond line style. The resources cloud be:
+	- login
+	- upload
+	- download
 
 But CLI could not do anything for example: view the brain 2D/3D data. The tool is good at non-visualization feature.
 
@@ -25,6 +27,9 @@ CLI support the config file, the config options looks like:
 	username: user1@cloud.com
 	password: user1password
 	applicationType: 1
+
+Tip: 
+	- ngcli's output format is json, so the jq is good tool for parse the output, eg: ngcli project list | jq
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {

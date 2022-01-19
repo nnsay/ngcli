@@ -1,18 +1,26 @@
 package lib
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"nnsay/ngcli/types"
 	"strconv"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
-var fetch Fetch
-var c = &http.Client{
-	Timeout: 30 * time.Second,
+type Fetch struct {
+	c *http.Client
 }
 
-func doRequest(method string, url string, body io.Reader) ([]byte, error) {
+var fetch Fetch
+
+func (f *Fetch) Request(method string, url string, body io.Reader) ([]byte, error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
@@ -22,9 +30,10 @@ func doRequest(method string, url string, body io.Reader) ([]byte, error) {
 	if err == nil && config.Auth.Token != "" {
 		req.Header.Set("x-ng-application-type", strconv.Itoa(config.ApplicationType))
 		req.Header.Set("x-ng-orgid", strconv.Itoa(config.Auth.OrgId))
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.Auth.Token))
 	}
 
-	res, err := c.Do(req)
+	res, err := f.c.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -33,27 +42,79 @@ func doRequest(method string, url string, body io.Reader) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if res.StatusCode >= http.StatusBadRequest {
+		erroCode := types.ErrorCode{}
+		err = json.Unmarshal(bodyBytes, &erroCode)
+		if err != nil {
+			return nil, err
+		}
+		// if the errcode is auth failure retry,
+		// the normal auth failure reason is JWT token expiration
+		if erroCode.Code == API_ERROR_AUTHFAILED {
+			err = f.Login()
+			if err != nil {
+				return nil, err
+			}
+			_, err = f.Request(method, url, body)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, errors.New(string(bodyBytes))
+	}
 	return bodyBytes, nil
 }
 
-// Fetch -- http require helper
-type Fetch struct {
-	Request    func(method string, url string, body io.Reader) ([]byte, error)
-	SetTimeout func(timeout time.Duration)
+func (f *Fetch) SetTimeout(_timeout time.Duration) {
+	f.c = &http.Client{
+		Timeout: _timeout,
+	}
+}
+
+func (f *Fetch) Login() error {
+	username := viper.GetString("username")
+	password := viper.GetString("password")
+	applicationType := viper.GetInt("applicationType")
+	loginDTO := types.LoginDTO{ApplicationType: applicationType, UserName: username, Password: password}
+	body, _ := json.Marshal(loginDTO)
+	url := fmt.Sprintf("https://%s/%s", viper.GetString("endpoint"), API_AUTH_LOGIN)
+
+	result, err := fetch.Request(http.MethodPost, url, bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+	loginResult := types.LoinResultDTO{}
+	err = json.Unmarshal(result, &loginResult)
+	if err != nil {
+		return err
+	}
+
+	config, err := ReadConfig()
+	if err != nil {
+		return err
+	}
+	config.Auth = types.AuthConfig{
+		Token:   loginResult.Token,
+		TokenAt: time.Now().Format("2006-01-02 13:04:06"),
+		OrgId:   loginResult.User.OrgID,
+	}
+	err = SaveConfig(config)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func init() {
 	fetch = Fetch{
-		Request: doRequest,
-		SetTimeout: func(_timeout time.Duration) {
-			c = &http.Client{
-				Timeout: _timeout,
-			}
+		c: &http.Client{
+			Timeout: 30 * time.Second,
 		},
 	}
 }
 
 // GetFetch -- factory for get the http request helper
-func GetFetch() Fetch {
-	return fetch
+func GetFetch() *Fetch {
+	return &fetch
 }
