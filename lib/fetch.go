@@ -42,7 +42,6 @@ func (f *Fetch) Request(method string, url string, body io.Reader) ([]byte, erro
 	if err != nil {
 		return nil, err
 	}
-
 	if res.StatusCode >= http.StatusBadRequest {
 		erroCode := types.ErrorCode{}
 		err = json.Unmarshal(bodyBytes, &erroCode)
@@ -56,10 +55,7 @@ func (f *Fetch) Request(method string, url string, body io.Reader) ([]byte, erro
 			if err != nil {
 				return nil, err
 			}
-			_, err = f.Request(method, url, body)
-			if err != nil {
-				return nil, err
-			}
+			return f.Request(method, url, body)
 		}
 		return nil, errors.New(string(bodyBytes))
 	}
@@ -96,7 +92,7 @@ func (f *Fetch) Login() error {
 	}
 	config.Auth = types.AuthConfig{
 		Token:   loginResult.Token,
-		TokenAt: time.Now().Format("2006-01-02 13:04:06"),
+		TokenAt: time.Now().Format("2006-01-02 15:04:05"),
 		OrgId:   loginResult.User.OrgID,
 	}
 	err = SaveConfig(config)
