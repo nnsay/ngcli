@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20190618055949-e8251f77f2ba // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -22,5 +23,6 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 )

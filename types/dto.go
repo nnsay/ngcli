@@ -17,3 +17,13 @@ type LoinResultDTO struct {
 	Token   string            `json:"token"`
 	User    LoinResultUserDTO `json:"user"`
 }
+
+type UploadSTSDTO struct {
+	OSSKey          string `json:"ossKey"`
+	OSSRegion       string `json:"ossRegion"`
+	OSSUri          string `json:"ossUri"`
+	AccessKeyId     string `json:"accessKeyId"`
+	AccessKeySecret string `json:"accessKeySecret"`
+	SecurityToken   string `json:"securityToken"`
+	ExpirationMS    int    `json:"expirationMS"`
+}
