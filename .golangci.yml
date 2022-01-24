@@ -1,0 +1,7 @@
+run:
+  modules-download-mode: mod
+linters-settings:
+  errcheck:
+    check-blank: false
+  errchkjson:
+     check-error-free-encoding: false
