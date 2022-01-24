@@ -28,9 +28,11 @@ var uploadCmd = &cobra.Command{
 		file := viper.GetString("file")
 		subjectId := viper.GetInt("subjectId")
 		fileName := filepath.Base(file)
+		partSize := viper.GetInt64("partSize")
+		parallelNumber := viper.GetInt("parallelNumber")
 
 		stsToken := uploadSTSToken(subjectId, fileName)
-		upload(file, stsToken)
+		upload(file, stsToken, partSize, parallelNumber)
 	},
 }
 
@@ -44,6 +46,14 @@ func init() {
 	uploadCmd.Flags().IntP("subjectId", "s", 0, "required, the subject id, eg: 1268")
 	uploadCmd.MarkFlagRequired("subjectId")
 	viper.BindPFlag("subjectId", uploadCmd.Flags().Lookup("subjectId"))
+
+	uploadCmd.Flags().Int64P("partSize", "b", 0, "optional, the upload part size, default: 5242880")
+	viper.BindPFlag("partSize", uploadCmd.Flags().Lookup("partSize"))
+	viper.SetDefault("partSize", 5242880)
+
+	uploadCmd.Flags().IntP("parallelNumber", "n", 0, "optional, paralle upload process count, default: 5")
+	viper.BindPFlag("parallelNumber", uploadCmd.Flags().Lookup("parallelNumber"))
+	viper.SetDefault("parallelNumber", 5)
 }
 
 func uploadSTSToken(subjectId int, fileName string) types.UploadSTSDTO {
@@ -58,7 +68,7 @@ func uploadSTSToken(subjectId int, fileName string) types.UploadSTSDTO {
 	return accessKey
 }
 
-func upload(file string, stsToken types.UploadSTSDTO) {
+func upload(file string, stsToken types.UploadSTSDTO, partSize int64, parallelNumber int) {
 	client, err := oss.New(
 		fmt.Sprintf("%s.aliyuncs.com", stsToken.OSSRegion),
 		stsToken.AccessKeyId,
@@ -73,7 +83,8 @@ func upload(file string, stsToken types.UploadSTSDTO) {
 	if err != nil {
 		log.Panic(err)
 	}
-	err = bucket.PutObjectFromFile(stsToken.OSSUri, file)
+
+	err = bucket.UploadFile(stsToken.OSSKey, file, partSize, oss.Routines(parallelNumber))
 	if err != nil {
 		log.Panic(err)
 	}
