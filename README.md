@@ -24,7 +24,7 @@ ngcli auth login
 ngcli project list
 ```
 
-# ngcli subeject
+## ngcli subeject
 
 ### ngcli subject list
 ```
