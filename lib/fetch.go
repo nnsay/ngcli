@@ -71,10 +71,11 @@ func (f *Fetch) SetTimeout(_timeout time.Duration) {
 func (f *Fetch) Login() error {
 	username := viper.GetString("username")
 	password := viper.GetString("password")
+	endpoint := viper.GetString("endpoint")
 	applicationType := viper.GetInt("applicationType")
 	loginDTO := types.LoginDTO{ApplicationType: applicationType, UserName: username, Password: password}
 	body, _ := json.Marshal(loginDTO)
-	url := fmt.Sprintf("https://%s/%s", viper.GetString("endpoint"), API_AUTH_LOGIN)
+	url := fmt.Sprintf("https://%s/%s", endpoint, API_AUTH_LOGIN)
 
 	result, err := fetch.Request(http.MethodPost, url, bytes.NewBuffer(body))
 	if err != nil {
@@ -85,11 +86,14 @@ func (f *Fetch) Login() error {
 	if err != nil {
 		return err
 	}
-
 	config, err := ReadConfig()
 	if err != nil {
 		return err
 	}
+	config.Username = username
+	config.Password = password
+	config.Endpoint = endpoint
+	config.ApplicationType = applicationType
 	config.Auth = types.AuthConfig{
 		Token:   loginResult.Token,
 		TokenAt: time.Now().Format("2006-01-02 15:04:05"),

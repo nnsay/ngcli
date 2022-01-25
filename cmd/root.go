@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"nnsay/ngcli/lib"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -73,8 +74,10 @@ func init() {
 	// username
 	rootCmd.PersistentFlags().StringP("username", "u", "", "required, eg: user@cloud.cn")
 	rootCmd.MarkFlagRequired("username")
+	viper.BindPFlag("username", rootCmd.PersistentFlags().Lookup("username"))
 	rootCmd.PersistentFlags().StringP("password", "p", "", "required, eg: password for user account")
 	rootCmd.MarkFlagRequired("password")
+	viper.BindPFlag("password", rootCmd.PersistentFlags().Lookup("password"))
 
 	// applicationType
 	rootCmd.PersistentFlags().IntP("applicationType", "a", 0, "required, the production code, eg: data service(1), presurge(2), default 1")
@@ -100,7 +103,9 @@ func initConfig() {
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".ngcli")
+		cfgFile = home + "/.ngcli.yaml"
 	}
+	lib.MakeSureConfigFile(cfgFile)
 
 	viper.AutomaticEnv() // read in environment variables that match
 
