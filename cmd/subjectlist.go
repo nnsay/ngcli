@@ -22,7 +22,7 @@ var subjectlistCmd = &cobra.Command{
 		url := fmt.Sprintf("https://%s/%s", viper.GetString("endpoint"), lib.API_SUBJECT)
 		byteBody, err := lib.GetFetch().Request(http.MethodGet, url, nil)
 		if err != nil {
-			log.Panic(err)
+			log.Fatal(err)
 		}
 		prettyJSON, _ := lib.PrettyJSON(byteBody)
 		fmt.Println(prettyJSON)

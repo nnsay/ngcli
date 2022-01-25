@@ -43,5 +43,5 @@ ngcli subject delete --subjectId 3959 --projectId 207
 
 ## ngcli upload
 ```
-ngcli upload -f ~/Downloads/debug.zip -subjectId 1268 --projectId 207
+ngcli upload -f ~/Downloads/debug.zip --subjectId 1268 --projectId 207
 ```

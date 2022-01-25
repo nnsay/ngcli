@@ -30,6 +30,7 @@ func (f *Fetch) Request(method string, url string, body io.Reader) ([]byte, erro
 	if err == nil && config.Auth.Token != "" {
 		req.Header.Set("x-ng-application-type", strconv.Itoa(config.ApplicationType))
 		req.Header.Set("x-ng-orgid", strconv.Itoa(config.Auth.OrgId))
+		req.Header.Set("x-ng-endpointtype", strconv.Itoa(1))
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", config.Auth.Token))
 	}
 

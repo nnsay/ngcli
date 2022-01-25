@@ -26,12 +26,12 @@ var uploadCmd = &cobra.Command{
 	Short: "Upload file(zip)",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		file := viper.GetString("file")
-		subjectId := viper.GetInt("subjectId")
+		file, _ := cmd.Flags().GetString("file")
+		subjectId, _ := cmd.Flags().GetInt("subjectId")
 		fileName := filepath.Base(file)
 		partSize := viper.GetInt64("partSize")
 		parallelNumber := viper.GetInt("parallelNumber")
-		projectId := viper.GetInt("projectId")
+		projectId, _ := cmd.Flags().GetInt("projectId")
 
 		stsToken := uploadSTSToken(subjectId, fileName)
 
@@ -53,11 +53,9 @@ func init() {
 
 	uploadCmd.Flags().StringP("file", "f", "", "required, the upload zip file path, eg: ./philips-reconall.zip")
 	uploadCmd.MarkFlagRequired("file")
-	viper.BindPFlag("file", uploadCmd.Flags().Lookup("file"))
 
 	uploadCmd.Flags().IntP("subjectId", "s", 0, "required, the subject id, eg: 1268")
 	uploadCmd.MarkFlagRequired("subjectId")
-	viper.BindPFlag("subjectId", uploadCmd.Flags().Lookup("subjectId"))
 
 	uploadCmd.Flags().Int64P("partSize", "b", 0, "optional, the upload part size, default: 5242880")
 	viper.BindPFlag("partSize", uploadCmd.Flags().Lookup("partSize"))
@@ -69,14 +67,13 @@ func init() {
 
 	uploadCmd.Flags().Int("projectId", 0, "required, project id, it can be get from project list command")
 	uploadCmd.MarkFlagRequired("projectId")
-	viper.BindPFlag("projectId", uploadCmd.Flags().Lookup("projectId"))
 }
 
 func uploadSTSToken(subjectId int, fileName string) types.UploadSTSDTO {
 	url := fmt.Sprintf("https://%s/%s/%d/uploads/ossuploadtoken?ln=%s&mimeType=application/octet-stream", viper.GetString("endpoint"), lib.API_SUBJECT, subjectId, fileName)
 	byteBody, err := lib.GetFetch().Request(http.MethodGet, url, nil)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	accessKey := types.UploadSTSDTO{}
@@ -92,17 +89,17 @@ func upload(file string, stsToken types.UploadSTSDTO, partSize int64, parallelNu
 		oss.SecurityToken(stsToken.SecurityToken),
 	)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 	bucktName := strings.Split(strings.Split(stsToken.OSSUri, "//")[1], "/")[0]
 	bucket, err := client.Bucket(bucktName)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	err = bucket.UploadFile(stsToken.OSSKey, file, partSize, oss.Routines(parallelNumber))
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 }
 
@@ -112,7 +109,7 @@ func createUpload(projectId int, subjectId int, fileName string, s3uri string) i
 	url := fmt.Sprintf("https://%s/%s/%d/uploads", viper.GetString("endpoint"), lib.API_SUBJECT, subjectId)
 	byteBody, err := lib.GetFetch().Request(http.MethodPost, url, bytes.NewBuffer(data))
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 	createdUpload := types.CreatedUploadDTO{}
 	json.Unmarshal(byteBody, &createdUpload)
@@ -126,7 +123,7 @@ func submitUpload(uploadId int, subjectId int) {
 	url := fmt.Sprintf("https://%s/%s/%d/uploads/%d", viper.GetString("endpoint"), lib.API_SUBJECT, subjectId, uploadId)
 	_, err := lib.GetFetch().Request(http.MethodPut, url, bytes.NewBuffer(data))
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 }
 
@@ -137,7 +134,7 @@ func createJob(projectId int, subjectId int, uploadId int) int {
 	url := fmt.Sprintf("https://%s/%s/%d/jobs", viper.GetString("endpoint"), lib.API_SUBJECT, subjectId)
 	byteBody, err := lib.GetFetch().Request(http.MethodPost, url, bytes.NewBuffer(data))
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 	createdJob := types.CreatedJobDTO{}
 	json.Unmarshal(byteBody, &createdJob)
@@ -150,7 +147,7 @@ func submitJob(jobId int, subjectId int) {
 	url := fmt.Sprintf("https://%s/%s/%d/jobs/%d/submit", viper.GetString("endpoint"), lib.API_SUBJECT, subjectId, jobId)
 	_, err := lib.GetFetch().Request(http.MethodPut, url, bytes.NewBuffer(data))
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 }
 

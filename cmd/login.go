@@ -19,7 +19,7 @@ var loginCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		err := lib.GetFetch().Login()
 		if err != nil {
-			log.Panic(err)
+			log.Fatal(err)
 		}
 		fmt.Println("Login Success")
 	},

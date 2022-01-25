@@ -36,15 +36,15 @@ Tip:
 	Run: func(cmd *cobra.Command, args []string) {
 		endpoint := viper.GetString("endpoint")
 		if endpoint == "" {
-			log.Panic("endpoint is requried")
+			log.Fatal("endpoint is requried")
 		}
 		username := viper.GetString("username")
 		if username == "" {
-			log.Panic("username is requried")
+			log.Fatal("username is requried")
 		}
 		password := viper.GetString("password")
 		if password == "" {
-			log.Panic("password is requried")
+			log.Fatal("password is requried")
 		}
 
 		loginCmd.Run(cmd, args)
