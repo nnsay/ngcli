@@ -1,3 +1,9 @@
+# The config for golangci-lint
+# The vscode setting looks like:
+#  "go.lintTool": "golangci-lint",
+#  "go.lintFlags": [
+#      "--fast"
+#  ]
 run:
   modules-download-mode: mod
 linters-settings:

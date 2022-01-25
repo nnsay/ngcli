@@ -50,7 +50,7 @@ func (f *Fetch) Request(method string, url string, body io.Reader) ([]byte, erro
 		}
 		// if the errcode is auth failure retry,
 		// the normal auth failure reason is JWT token expiration
-		if erroCode.Code == API_ERROR_AUTHFAILED {
+		if erroCode.Code == HTTP_ERROR_AUTHFAILED {
 			err = f.Login()
 			if err != nil {
 				return nil, err

@@ -27,3 +27,30 @@ type UploadSTSDTO struct {
 	SecurityToken   string `json:"securityToken"`
 	ExpirationMS    int    `json:"expirationMS"`
 }
+
+type CreatedUploadDTO struct {
+	Upload struct {
+		ID int `json:"id"`
+	} `json:"upload"`
+}
+type CreatedJobDTO struct {
+	ID              int    `json:"id"`
+	SubjectID       int    `json:"subjectId"`
+	ProjectID       int    `json:"projectId"`
+	CreatedByUserID int    `json:"createdByUserId"`
+	JobType         int    `json:"jobType"`
+	Status          int    `json:"status"`
+	CreatedAt       int64  `json:"createdAt"`
+	RequestRef      string `json:"requestRef"`
+	UploadID        int    `json:"uploadId"`
+	JobInfo         struct {
+		ExperimentInfo struct {
+			CommonInfo struct {
+				SubjectCustID string `json:"subjectCustId"`
+			} `json:"commonInfo"`
+			ExperimentType   int `json:"experimentType"`
+			ConfirmStatus    int `json:"confirmStatus"`
+			TimeofRepetition int `json:"timeofRepetition"`
+		} `json:"experimentInfo"`
+	} `json:"jobInfo"`
+}
