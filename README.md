@@ -9,14 +9,14 @@ Go to the `Release` page, find the one version which you like. Current every ver
 
 Download the binary to your **PATH** directory rename or alias it.
 ```
-# assume you download the darwin-amd64-ngcli at ~/Download
+# assume you download the darwin-amd64-ngcli at ~/Downloads
 ...
 
 # move it to /usr/local/bin
 mv darwin-amd64-ngcli /usr/local/bin/ngcli
 
 # or you can make alias in your shell
-alias ngcli="~/Download/darwin-amd64-ngcli"
+alias ngcli="~/Downloads/darwin-amd64-ngcli"
 ```
 
 # Usage
